@@ -1,47 +1,55 @@
 import csv
+import sys
 import os
 
-def convert_csv_to_tex(input_file):
-    # Determine the output file name based on the input file name
-    output_file = os.path.join(os.path.dirname(input_file),
-                               os.path.splitext(os.path.basename(input_file))[0] + '.tex')
+def read_csv(input_file):
+    with open(input_file, mode='r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        rows = [row for row in reader]
+    return rows
 
-    # Write the header comments to the output file
-    with open(output_file, 'w') as f:
-        f.write("% This file was automatically generated.\n")
-        f.write("% Do not manually edit this file.\n")
-        f.write("% Instead edit the csv and rerun the script.\n\n")
+def generate_tex(rows):
+    tex_entries = []
+    tex_entries.append("% This file was automatically generated.")
+    tex_entries.append("% Do not manually edit this file.")
+    tex_entries.append("% Instead edit the csv and rerun the script.")
+    tex_entries.append("")
 
-    # Initialize a flag for the header row
-    header_row = True
-    header = []
+    for row in rows:
+        entry = []
+        command = row['command']
+        label = row['label']
+        entry.append(f"\\{command}{{{label}}}{{")
 
-    # Open the CSV file and read it row by row
-    with open(input_file, 'r') as csv_file:
-        csv_reader = csv.reader(csv_file)
-        with open(output_file, 'a') as tex_file:  # Open the tex file in append mode
-            for row in csv_reader:
-                # Handle the header row
-                if header_row:
-                    header = row
-                    header_row = False
-                    continue
+        keys = list(row.keys())[2:]  # Exclude the first two keys: 'command' and 'label'
+        key_value_pairs = []
+        for key in keys:
+            value = row[key]
+            if ',' in value:
+                value = f'{{{value}}}'  # Enclose the value in braces if it contains a comma
+            key_value_pairs.append(f"  {{{key}}} = {{{value}}}")
 
-                # Start the \\newglossaryentry with the label from the first column
-                tex_file.write(f"\\newglossaryentry{{{row[0]}}}{{\n")
+        entry.append(",\n".join(key_value_pairs))
+        entry.append("}")
 
-                # Loop through the rest of the columns to add the corresponding fields
-                for i in range(1, len(row)):
-                    tex_file.write(f"  {header[i]} = {{{row[i]}}},\n")
+        tex_entries.append("\n".join(entry))
 
-                # Close the \\newglossaryentry
-                tex_file.write("}\n")
+    return "\n".join(tex_entries)
 
-if __name__ == "__main__":
-    # Check for command-line argument
-    if len(os.sys.argv) != 2:
-        print("Usage: python script.py <input_file.csv>")
-        os.sys.exit(1)
+if __name__ == '__main__':
+    input_file = sys.argv[1]
 
-    input_file = os.sys.argv[1]
-    convert_csv_to_tex(input_file)
+    # Check if the output file is provided
+    if len(sys.argv) > 2:
+        output_file = sys.argv[2]
+    else:
+        base_name, _ = os.path.splitext(input_file)
+        output_file = f"{base_name}.tex"
+
+    rows = read_csv(input_file)
+    tex_content = generate_tex(rows)
+
+    with open(output_file, 'w', encoding='utf-8') as file:
+        file.write(tex_content)
+
+    print(f"Tex file created at {output_file}")
