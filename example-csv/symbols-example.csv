@@ -1,0 +1,3 @@
+﻿label,symbol,sort-prefix,description
+emptyset,\emptyset,math,the set containing no elements
+convd,\leadsto,stat,convergence in distribution

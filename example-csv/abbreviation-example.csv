@@ -1,0 +1,4 @@
+command,label,name,description
+newglossaryentry,ate,ATE,average treatment effect
+newglossaryentry,mab,MAB,multi-armed bandit
+newglossaryentry,cmab,CMAB,contextual multi-armed bandit
