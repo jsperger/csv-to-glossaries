@@ -57,12 +57,14 @@ The script creates a `sort` key-value where the value is given by concatenating 
 
 The result is:
 
+```tex
 \newglossaryentry{<label>}{
   category = {symbol},
   name = \ensuremath{<symbol>},
   description = {<description>},
   sort = {<sort-prefix>-<label>}
 }
+```
 
 # Usage
 
